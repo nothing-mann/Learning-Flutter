@@ -1,15 +1,28 @@
-import 'package:uuid/uuid.dart';
-import 'package:favourite_places/models/place.dart';
+//import 'package:favourite_places/models/place.dart';
+import 'dart:io';
+import 'package:favourite_places/providers/user_places.dart';
+import 'package:favourite_places/widgets/image_input.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NewPlacesScreen extends StatelessWidget {
+class NewPlacesScreen extends ConsumerWidget {
   const NewPlacesScreen({super.key});
   @override
-  Widget build(context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    File? selectedImage;
     var _enteredName = '';
-    var uuid = Uuid().v4();
+
     void _savePlace() {
-      Navigator.of(context).pop(Place(id: uuid, name: _enteredName));
+      if (_enteredName.isEmpty || selectedImage == null) {
+        return;
+      }
+      ref.read(userPlacesProvider.notifier).addPlace(
+            _enteredName,
+            selectedImage!,
+          );
+      Navigator.of(context).pop(
+          //Place(name: _enteredName)
+          );
     }
 
     return Scaffold(
@@ -29,10 +42,24 @@ class NewPlacesScreen extends StatelessWidget {
                 onChanged: (value) {
                   _enteredName = value;
                 },
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    fontWeight: FontWeight.normal,
+                    color: Theme.of(context).colorScheme.primary),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ImageInput(
+                onSelectedImage: (image) {
+                  selectedImage = image;
+                },
+              ),
+              const SizedBox(
+                height: 10,
               ),
               ElevatedButton(
                 onPressed: _savePlace,
-                child: Text('Save Place'),
+                child: const Text('Save Place'),
               ),
             ],
           ))),
